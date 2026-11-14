@@ -1,8 +1,3 @@
-# MODO CELULAR: no repositório você só precisa de DOIS arquivos:
-#   1) lia-etapa4.zip           (suba pelo botão "Add file → Upload files")
-#   2) este arquivo, em  .github/workflows/build-from-zip.yml   ("Add file → Create new file")
-# Opcional: lia_android.ppn na raiz do repositório (palavra "Lia" do Picovoice).
-# O build extrai o ZIP sozinho. Baixe os APKs em Actions → último build → Artifacts → lia-apks.
 name: Build APKs (a partir do ZIP)
 
 on:
@@ -14,6 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
       LIA_TOKEN: ${{ secrets.LIA_TOKEN }}
       LIA_PICOVOICE_KEY: ${{ secrets.LIA_PICOVOICE_KEY }}
       LIA_TV_HOST: ${{ secrets.LIA_TV_HOST }}
@@ -38,8 +34,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-
-      - uses: android-actions/setup-android@v3
 
       - uses: gradle/actions/setup-gradle@v4
         with:
