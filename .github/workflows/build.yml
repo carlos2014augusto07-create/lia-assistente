@@ -1,0 +1,58 @@
+# MODO CELULAR: no repositório você só precisa de DOIS arquivos:
+#   1) lia-etapa4.zip           (suba pelo botão "Add file → Upload files")
+#   2) este arquivo, em  .github/workflows/build-from-zip.yml   ("Add file → Create new file")
+# Opcional: lia_android.ppn na raiz do repositório (palavra "Lia" do Picovoice).
+# O build extrai o ZIP sozinho. Baixe os APKs em Actions → último build → Artifacts → lia-apks.
+name: Build APKs (a partir do ZIP)
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      LIA_TOKEN: ${{ secrets.LIA_TOKEN }}
+      LIA_PICOVOICE_KEY: ${{ secrets.LIA_PICOVOICE_KEY }}
+      LIA_TV_HOST: ${{ secrets.LIA_TV_HOST }}
+      LIA_ESP_HOST: ${{ secrets.LIA_ESP_HOST }}
+      LIA_TTS_VOICE: ${{ secrets.LIA_TTS_VOICE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extrair o ZIP
+        run: |
+          unzip -q lia-etapa4.zip -d projeto
+          DIR=$(dirname "$(find projeto -name settings.gradle.kts | head -1)")
+          echo "Projeto em: $DIR"
+          echo "PROJ=$DIR" >> "$GITHUB_ENV"
+          if [ -f lia_android.ppn ]; then
+            mkdir -p "$DIR/app/src/main/assets"
+            cp lia_android.ppn "$DIR/app/src/main/assets/lia_android.ppn"
+            echo "lia_android.ppn incluído no app"
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+
+      - name: Compilar
+        working-directory: ${{ env.PROJ }}
+        run: gradle assembleDebug --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lia-apks
+          path: |
+            ${{ env.PROJ }}/app/build/outputs/apk/debug/*.apk
+            ${{ env.PROJ }}/tv/build/outputs/apk/debug/*.apk
+            
