@@ -20,7 +20,7 @@ jobs:
 
       - name: Extrair o ZIP
         run: |
-          unzip -q lia-etapa5b.zip -d projeto
+          unzip -q lia-etapa6.zip -d projeto
           DIR=$(dirname "$(find projeto -name settings.gradle.kts | head -1)")
           echo "Projeto em: $DIR"
           echo "PROJ=$DIR" >> "$GITHUB_ENV"
